@@ -1,0 +1,195 @@
+<style>
+  [v-cloak] {
+    display: none;
+  }
+  #app {
+    padding: 16px;
+  }
+  .user-container {
+    background-color: white;
+    margin: 16px;
+    padding: 16px;
+  }
+  .post-container {
+    background-color: white;
+    margin: 16px;
+    padding: 16px;
+    border-radius: 5px;
+    border: solid 1px rgb(199, 199, 199);
+    display: flex;
+    flex-direction: column;
+  }
+  .form-item-label {
+    font-size: 15px;
+    font-weight: bold;
+    margin-right: 16px;
+    width: 140px;
+    text-align: right;
+  }
+  .center-cropped {
+    object-position: center; /* Center the image within the element*/
+    object-fit: cover;
+    width: 64px;
+    height: 64px;
+    border-radius: 100px;
+    border: solid 1px rgb(94, 94, 94);
+  }
+  .save-button {
+    flex: 1;
+    width: 100%;
+    color: white;
+    font-weight: bold;
+    padding: 8px;
+    border: solid;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+  .blue-button {
+    background-color: dodgerblue;
+  }
+  .disabled-button {
+    background-color: rgb(201, 201, 201);
+  }
+  .form-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .fullName-input {
+    font-size: 14px;
+    padding: 8px;
+    border-radius: 5px;
+    border: solid 1px rgb(206, 206, 206);
+  }
+  textarea {
+    font-size: 14px;
+    padding: 8px;
+    border-radius: 5px;
+    width: 300px;
+    border: solid 1px rgb(206, 206, 206);
+  }
+  .red {
+    background-color: red;
+  }
+  .gray {
+    background-color: darkgray;
+  }
+  .blue {
+    background-color: rgb(7, 130, 255);
+  }
+  .btn {
+    border-radius: 5px;
+    border: solid 1px rgb(199, 199, 199);
+    padding: 5px 10px;
+    font-weight: bold;
+    color: white;
+  }
+</style>
+<%- exposeLocalsToBrowser({keys: ['user']}) %> <%-
+partial('../../partials/navbar.ejs') %>
+
+<div id="app">
+  <div class="user-container">
+    <h4 style="padding-left: 16px">Account Settings</h4>
+    <div style="padding: 16px">
+      <div class="form-item">
+        <div class="form-item-label">Email Address:</div>
+        <div style="font-size: 14px">{{ user.emailAddress }}</div>
+      </div>
+      <div class="form-item">
+        <div class="form-item-label">Full Name:</div>
+        <input
+          type="text"
+          name=""
+          id=""
+          v-model="user.fullName"
+          class="fullName-input"
+        />
+      </div>
+      <div class="form-item">
+        <div class="form-item-label">Bio:</div>
+        <div style="font-size: 14px">
+          <textarea v-model="user.bio"> </textarea>
+        </div>
+      </div>
+
+      <div class="form-item">
+        <div class="form-item-label">Avatar</div>
+        <div>
+          <img
+            :src="user.profileImageUrl? user.profileImageUrl: defaultAvatar"
+            class="center-cropped"
+          />
+          <div style="margin-top: 12px">
+            <input
+              type="file"
+              name="imageFile"
+              id="imageFile"
+              ref="imageFile"
+              v-on:change="handleAvatarChange"
+            />
+          </div>
+        </div>
+      </div>
+      <button
+        v-on:click="handleSave"
+        :disabled="isSaving"
+        v-bind:class="isSaving ? 'disabled-button save-button': 'blue-button save-button'"
+      >
+        Save
+      </button>
+    </div>
+  </div>
+
+  <div style="font-weight: bold; padding: 16px">Posts</div>
+  <div v-for="p in user.posts"><%- partial('../../partials/post.ejs') %></div>
+</div>
+
+<script>
+  const currentUser = window.SAILS_LOCALS.user;
+  //currentUser.profileImageUrl = "";
+
+  const App = new Vue({
+    el: "#app",
+    data: {
+      user: currentUser,
+      isSaving: false,
+      defaultAvatar: "/images/logo.png",
+      imageFile: null,
+    },
+    methods: {
+      handleSave: async function (e) {
+        e.preventDefault();
+        console.log(this.user);
+        const formData = new FormData();
+        formData.append("fullName", this.user.fullName);
+        formData.append("bio", this.user.bio);
+        formData.append("imageFile", this.imageFile);
+
+        this.isSaving = true;
+        try {
+          const res = await axios.post("/profile", formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          });
+          console.log(res);
+          //this.shouldShowCreatePost = false;
+          if (res.status === 200) {
+            console.log("user updated.");
+            window.location.href = res.request.responseURL;
+          }
+        } catch (error) {
+          console.error(error.toString());
+        }
+        this.isSaving = false;
+      },
+      handleAvatarChange: function (event) {
+        const file = this.$refs.imageFile.files[0];
+        const imageUrl = URL.createObjectURL(file);
+        this.user.profileImageUrl = imageUrl;
+        this.imageFile = file;
+      },
+    },
+  });
+</script>

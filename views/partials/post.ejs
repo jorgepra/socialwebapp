@@ -1,0 +1,45 @@
+<div class="post-container">
+  <div style="display: flex; margin-bottom: 16px">
+    <img
+      :src="p.user.profileImageUrl"
+      alt=""
+      class="center-cropped"
+      style="margin-right: 16px"
+    />
+    <div style="display: flex; flex-direction: column; justify-content: center">
+      <div style="font-weight: bold; font-size: 16px; margin-bottom: 4px">
+        {{ p.user.fullName }}
+      </div>
+      <div style="color: rgb(128, 128, 128); font-size: 13px">
+        Posted {{ p.fromNow }}
+      </div>
+    </div>
+  </div>
+  <!--
+  <div style="color: rgb(186, 186, 186)">
+    {{new Date(p.createdAt).toLocaleTimeString() + " " + new Date(p.createdAt).toLocaleDateString()}}
+  </div>
+  -->
+  <div>{{ p.text }}</div>
+  <div style="margin-top: 16px">
+    <img
+      :src="p.imageUrl"
+      alt=""
+      style="max-width: 100%; padding-bottom: 12px"
+    />
+  </div>
+  <a
+    :href="'/post/'+p.id"
+    v-if="p.isEnabledCommentLink"
+    style="margin-bottom: 12px"
+    >Comments</a
+  >
+  <button
+    v-if="p.canDelete"
+    v-on:click="deletePost(p)"
+    style="max-width: 100%"
+    class="btn red"
+  >
+    Delete
+  </button>
+</div>

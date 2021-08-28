@@ -1,0 +1,66 @@
+<style>
+  .user-container {
+    background-color: white;
+    margin-bottom: 16px;
+    padding: 16px;
+    border-radius: 5px;
+    border: solid 1px rgb(199, 199, 199);
+  }
+  .post-container {
+    background-color: white;
+    margin: 16px;
+    padding: 16px;
+    border-radius: 5px;
+    border: solid 1px rgb(199, 199, 199);
+    display: flex;
+    flex-direction: column;
+  }
+  .center-cropped {
+    object-position: center; /* Center the image within the element*/
+    object-fit: cover;
+    width: 50px;
+    height: 50px;
+    border-radius: 100px;
+    border: solid 1px rgb(94, 94, 94);
+  }
+</style>
+
+<%- exposeLocalsToBrowser({keys: ['user']})%> <%-
+partial('../../partials/navbar.ejs') %>
+<div id="app">
+  <div style="padding: 16px">
+    <h4>User information</h4>
+    <div class="user-container">
+      <div>{{ user.fullName }}</div>
+      <div>{{ user.emailAddress }}</div>
+    </div>
+
+    <div style="display: flex">
+      <div style="margin-top: 16px; width: 50%; margin-right: 16px">
+        <h4>Currently Following</h4>
+        <div v-for="u in user.following" class="user-container">
+          <div>{{ u.fullName }}</div>
+          <div>{{ u.emailAddress }}</div>
+        </div>
+      </div>
+      <div style="margin-top: 16px; flex: 1">
+        <h4>Followers</h4>
+        <div v-for="u in user.followers" class="user-container">
+          <div>{{ u.fullName }}</div>
+          <div>{{ u.emailAddress }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="font-weight: bold; padding: 16px">Posts</div>
+
+  <div v-for="p in user.posts"><%- partial('../../partials/post.ejs') %></div>
+</div>
+<script>
+  const app = new Vue({
+    el: "#app",
+    data: {
+      user: window.SAILS_LOCALS.user,
+    },
+  });
+</script>

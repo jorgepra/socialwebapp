@@ -1,0 +1,67 @@
+<style>
+  #app {
+    padding: 16px;
+  }
+  .user-container {
+    background-color: white;
+    margin-bottom: 16px;
+    padding: 16px;
+  }
+  .following {
+    background-color: black;
+    color: white;
+    border-radius: 5px;
+    border: solid 1px rgb(199, 199, 199);
+  }
+  .not-following {
+    background-color: white;
+    color: black;
+    border-radius: 5px;
+    border: solid 1px rgb(199, 199, 199);
+  }
+</style>
+<%- exposeLocalsToBrowser({keys: ['users']}) %> <%-
+partial('../../partials/navbar.ejs') %>
+
+<div id="app">
+  <h4>This is the list of users page</h4>
+  <div v-for="u in users" class="user-container" v-bind:key="u.id">
+    <a :href="'/user/' + u.id">
+      {{ u.fullName }}
+    </a>
+    <div>{{ u.emailAddress }}</div>
+    <div style="margin-top: 16px">
+      <button
+        v-on:click="follow(u)"
+        v-bind:class="u.isFollowing? 'following': 'not-following'"
+      >
+        {{ u.isFollowing ? "Unfollow" : "Follow" }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const allUsers = window.SAILS_LOCALS.users;
+
+  const App = new Vue({
+    el: "#app",
+    data: {
+      message: "Hello from Vue",
+      users: allUsers,
+    },
+    methods: {
+      follow: async function (user) {
+        if (user.isFollowing) {
+          await axios.post("/unfollow/" + user.id);
+        } else {
+          await axios.post("/follow/" + user.id);
+        }
+        const originalId = user.id;
+        user.id = "Temp";
+        user.isFollowing = !user.isFollowing;
+        user.id = originalId;
+      },
+    },
+  });
+</script>
